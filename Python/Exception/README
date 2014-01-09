@@ -1,0 +1,52 @@
+			Python中的异常处理
+
+使用try/except进行抓取异常
+
+如:
+while True:
+	try:
+		x = int(raw_input('Please enter a number:'))
+		break
+	except ValueError:
+		print('That was no valid number.Try again')
+
+
+使用try/finally
+如:
+try:
+	x = int(raw_input('Please enter a number:'))
+finally:
+	print('Thank you for your input')
+
+这里的finally表示的当我们的异常即使出现，也会去执行这里的语句，不会被终止。
+理解成是当我们的程序发现异常假如退出的时候，进行的最后的处理
+
+
+try/raise:
+def filter_name(name):
+   ....:    try:
+   ....:        name = name.encode('ascii')
+   ....:    except UnicodeError, e:
+   ....:        if name == 'Gaël':
+   ....:            print('OK, Gaël')
+   ....:        else:
+   ....:            raise e
+   ....:    return name
+我们用户可以使用raise自定义的去抛出异常
+
+def achilles_arrow(x):
+   ....:    if abs(x - 1) < 1e-3:
+   ....:        raise StopIteration
+   ....:    x = 1 - (1-x)/2.
+   ....:    return x
+   ....:
+
+In [18]: x = 0
+
+In [19]: while True:
+   ....:     try:
+   ....:         x = achilles_arrow(x)
+   ....:     except StopIteration:
+   ....:         break
+
+我们可以在我们的函数中抛出异常，然后去抓取。

@@ -1,0 +1,70 @@
+				
+			系统操作模块
+
+目录和文件操作：
+os.getcwd():获取当前的路径
+
+os.listdir('.'):列出当前路径下的文件,返回的是一个列表
+
+os.mkdir('xxx')：在当前路径下创建一个文件夹
+
+os.rmdir('xxx'):删除文件夹
+
+os.remove('xxxx'):删除文件
+
+os.rename('xxxx','yyyy')：将文件xxxx重命名为yyyy
+
+os.open('xxx','flags'):打开一个文件，当文件不存在的时候创建文件，
+flags是权限有:w,r,b,a,r+.....，返回的是一个文件对象
+
+判断一个文件是否存在:
+os.path.exists('xxx'):文件存在True不存在Flase
+
+判断是否是一个文件:
+os.path.isfile('xxxx'):是文件返回True不是返回Flase
+
+判断是否是一个文件夹:
+os.path.isdir('xxx')
+
+
+使用我们的系统命令：
+os.system('系统命令'):如os.system('ls')
+我们使用的这个system中的系统的命令就是来自与sh模块
+我们可以这样的使用:
+import sh
+com = sh.ls()
+com这里是返回的一个列表对象
+
+遍历文件下的所有文件:
+os.walk(os.cur)
+
+for dirpath, dirname, filenames in os.walk(os.cur):	//返回三个对象一个是
+当前文件夹的路径，一个是当前文件夹下是文件夹的名在，一个是当前文件夹下是文件
+的名字
+详细的实现过程可以查看walkdir.py程序
+
+
+环境变量：
+os.environ:这里其实就是一个字典，有关键字
+os.environ['PYTHONPATH']：通过索引KEY(‘PYTHONPATH’)查看这个环境变量对应的数据
+os.getenv('PYTHONPATH'):得到环境变量
+
+
+				高级文件操作：
+这里就是要使用的是shutil模块
+shutil.rmtree:删除一个文件树
+shutil.move:移动一个文件夹或文件
+shutil.copy:拷贝文件或文件夹
+
+
+				文件之间的匹配:
+使用glob模块
+import glob
+file = glob.glob('*.txt')：这里返回一个列表，符合后缀名是txt的文件
+
+				查看系统信息:使用sysy模块
+sys.paltfrom:查看平台信息
+sys.version:查看版本信息
+sys.prefix:查看字库的信息
+sys.path:查看PYTHONPATH环境变量的数据	
+

@@ -1,0 +1,100 @@
+
+
+当我们使用next()的时候，函数要求我们的对象是一个迭代对象
+所以，我们要先将我们的对象转换成迭代对象：
+如：
+	nums = [1,2,3]
+	it = iter(nums)
+这样，我们的nums对象也转换成了一个临时的迭代对象然后传递给it对象,同时，他也保持原来的对象性质类型
+
+我们的for...in...循环就是使用的一个迭代的例子：
+f = open('/etc/fstab')
+f is f.__iter__()
+True
+
+使用()和使用[]的区别：
+当我们使用()的时候，进行的处理是对一个迭代对象进行处理
+当我们使用[]的时候，进行的处理是对一个列表对象进行处理
+
+(i for i in nums)                    
+<generator object <genexpr> at 0x...>
+ [i for i in nums]
+[1, 2, 3]
+list(i for i in nums)
+[1, 2, 3]
+
+迭代生成的字典对象和set对象
+{i for i in range(3)}   
+set([0, 1, 2])
+{i:i**2 for i in range(3)}   
+{0: 0, 1: 1, 2: 4}
+
+我们也可以这样的使用：
+set(i for i in 'abc')
+set(['a', 'c', 'b'])
+dict((i, ord(i)) for i in 'abc')
+{'a': 97, 'c': 99, 'b': 98}
+
+
+迭代的基础机制:generators
+
+def f():
+	print("--start--")
+	yield 3
+	print("--middle--")
+	yield 4
+	print("--finished--")
+
+gen = f()
+gen.next()
+gen.next()
+gen.next()
+
+这里的关键是yield，存在yield的函数称为Generator，在python中会特殊处理，。yie
+ld会把函数当前的执行状态保存，同时会将yield后面的值作为函数的返回值返回给调
+用者，当下次这个函数再次被调用时，会恢复函数的状态，从yield的下一个语句开始
+执行（不再是从函数第一行开始执行了）。这个功能帮助我们既可以写简单不易出错的
+递归函数，又可以提供线性的迭代器功能了（不需要手动保存状态了）。
+我们是通过这个yield关键字进行返回的，下一次调用直接跳过这个yield关键字，进入
+下一个语句工作。
+
+使用send(),throw()
+send()是向我们的迭代对象当中注入数据
+throw()是一个异常的抛出
+如:
+>>> import itertools
+>>> def g():
+...     print '--start--'
+...     for i in itertools.count():
+...         print '--yielding %i--' % i
+...         try:
+...             ans = yield i
+...         except GeneratorExit:
+...             print '--closing--'
+...             raise
+...         except Exception as e:
+...             print '--yield raised %r--' % e
+...         else:
+...             print '--yield returned %s--' % ans
+
+>>> it = g()
+>>> next(it)
+--start--
+--yielding 0--
+0
+>>> it.send(11)
+--yield returned 11--
+--yielding 1--
+1
+>>> it.throw(IndexError)
+--yield raised IndexError()--
+--yielding 2--
+2
+>>> it.close()
+--closing--
+
+
+
+
+Decorators:
+

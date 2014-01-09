@@ -1,0 +1,138 @@
+
+class Student(object):
+	"""docstring for Student"""
+	def __init__(self, name):
+		self.name = name
+	def set_age(self, age):
+		self.age = age
+	def set_major(self, major):
+		self.major = major;
+
+anna = Student('anna')
+anna.set_age(21)
+anna.set_major('physics')
+
+print(anna.age)
+		
+这里的在类中的self.xxx就是我们类字节的属性，我们通过类中的方法对他进行操作
+类中的这些属性可以使用self.xxx这样的方式在使用的时候才进行调用和创建
+这是一中动态的方式。
+
+
+Python中的对象继承：
+class Student(object):
+	"""docstring for Student"""
+	def __init__(self, name):
+		super(Student, self).__init__()
+		self.name = name
+	def self_age(self, age):
+		self.age = age
+	def self_major(self, major):
+		self.major = major
+
+
+class MasterStudent(Student):
+	internship = 'mandatory, from to songshuang'
+		
+我们的类MaterStudent继承于类Student，并且他自己有扩展的私有
+的类internaship属性。这个新继承的类，和我们的基类共用一个构造函数
+
+
+				The Numpy array object
+
+使用numpy模块
+使用numpy可以用来定义多维数组
+如创建一个二维数组：
+a = numpy.array([(1,2,3,4), (4,5,6,7)])
+这样我们的a就是一个二维数组
+
+我们的nump对象可以通过成员属性ndim和shape来反馈我们数组的行数和列数
+a.ndim  ======  行数
+a.shape ======  列数
+
+当我们使用len的时候，他返回的是第一个数组的
+
+
+Functions For createing arrays:
+a = np.arange(10)
+array([0,1,2,3,4,5,6,7,8,9])
+b = np.arange(1,2,3)
+array([1,2,3])
+
+np.ones()
+np.zeros()
+np.ones_like()
+np.zeros_like()
+
+或者使用精确点的：np.linspace()
+np.linspace(start, stop, num, endpoint, reststep)
+start:开始的数
+stop:结束的数
+num:这个范围之内有几个数
+endpoint:最后一个数是否包含在内
+reststep:这里进行分配的时候，两个数之间的间隔
+
+np.diag():将我们的数据进行对角线创建。如
+d = np.diag(np.array([1, 2, 3, 4]))
+d
+array([[1, 0, 0, 0],
+       [0, 2, 0, 0],
+       [0, 0, 3, 0],
+       [0, 0, 0, 4]])
+
+使用empty()随机生成数组:
+如:
+>>> np.empty([2, 2])
+array([[ -9.74499359e+001,   6.69583040e-309],
+       [  2.13182611e-314,   3.06959433e-309]])         #random
+
+>>> np.empty([2, 2], dtype=int)
+array([[-1073741821, -1067949133],
+       [  496041986,    19249760]])                     #random
+
+
+
+
+
+两个数组共享内存：深拷贝和浅拷贝的问题
+使用numpy.may_share_memory(a,b):判断a,b两个数组是否可以共享内存
+如果可以共享内存的话，修改一个数组将又可能会影响另一个数组。
+如：
+a = np.arange(10)
+>>> a
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+>>> b = a[::2] //这个只是一个浅拷贝
+>>> b
+array([0, 2, 4, 6, 8])
+>>> np.may_share_memory(a, b)
+True
+>>> b[0] = 12
+>>> b
+array([12,  2,  4,  6,  8])
+>>> a   # (!)
+array([12,  1,  2,  3,  4,  5,  6,  7,  8,  9])
+
+当我们使用拷贝的时候就不会相互影响啦：
+>>> a = np.arange(10)
+>>> c = a[::2].copy()  # force a copy
+>>> c[0] = 12
+>>> a
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+>>> np.may_share_memory(a, c)
+False
+
+
+np.random.seed(3)
+>>> a = np.random.random_integers(0, 20, 15)
+>>> a
+array([10,  3,  8,  0, 19, 10, 11,  9, 10,  6,  0, 20, 12,  7, 14])
+>>> (a % 3 == 0)
+array([False,  True, False,  True, False, False, False,  True, False,
+        True,  True, False,  True, False, False], dtype=bool)
+>>> mask = (a % 3 == 0)
+>>> extract_from_a = a[mask] # or,  a[a%3==0]
+>>> extract_from_a           # extract a sub-array with the mask
+array([ 3,  0,  9,  6,  0, 12])
+
+这里的seed表示的是重新随机的次数（当相同的时候）
