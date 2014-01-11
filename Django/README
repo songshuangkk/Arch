@@ -1,0 +1,66 @@
+启动项目:
+django-admin.py startproject xxxx
+上面这个命令会创建一个 djproject 目录，其中包含了运行 Django 项目所需要的基
+本配置文件
+
+要创建应用程序，可以使用 manage.py 脚本，这是一个特定于项目的 django-admin.py 脚本，其中 settings.py 文件可以自动提供
+
+python2 manage.py startapp jobs
+这样将要创建一个应用程序骨架，其中模型有一个Python模块，视图有另外一个Python模块
+会在job目录下生成__init__.py modules.py views.py
+
+为了使 Django 认识到新应用程序的存在，还需要向 settings.py 文件中的 INSTALLED_APPS 添加一个条目。对于这个职位公告板应用程序来说，我们必须添加字符串 djproject.jobs
+
+Django的404 Error页
+这个错误
+
+
+当我们输入网址的时候，所有均开始与setting文件。当我们运行python manger.py 
+runserver,脚本将在于manger.py同一个目录下查找名为setting.py的文件。这个文件
+包含了所有有关这个Django项目的配置信息，均大写:TEMPLATE_DIRS, DATABASE_NAME
+等。最重要的设置是ROOT_URLCONF，它将作为URLconf告诉Django在这个站点中哪些
+python的模块将被用到。
+如:mysite.urls ========= mysite/urls.py
+
+当访问我们的urls.py的文件的是哈，Django根据ROOT_URLCONF的设置装载URLconf。然
+后按顺序逐个匹配URLconf里面的URLpatterns，直到找到一个匹配的。当找到这个匹配
+的URLpatterns就调用相关联的view函数，并把HttpResponse对象作为第一个参数，返
+回。
+
+
+----------------------------------------------------------------------------
+	
+
+				动态内容
+
+我们可以在我们views.py文件中加入我们的一些视图函数：
+(注意，返回HttpResponse对象)。还不要忘了导入相应的模块。
+添加完之后，不要忘了在我们的urls.py文件中，匹配我们的新添加的视图函数
+
+注意：Django是有时区区分的，并且默认时区是America/Chicago。(它必须有个值，
+它的默认值是Django的诞生地:美国/芝加哥)如果我们处于其他的时区，需要进行修改
+我们在进行创建的时候，要灵活的使用正则表达式
+
+
+----------------------------------------------------------------------------
+			    URL配置和松耦合
+松耦合是一个重要的保证互换性的软件开发方法。
+
+
+出错的调试：
+我们可以用过使用assert False来触发出错页面。
+Django在我们开启运行服务器的时候，它默认的运行了debug模式.
+
+
+			      Django模板
+将我们的HTML编写到我们的views文件不是一个好的主意。原因如下：
+1.对页面设计进行的任何改变都必须对Python代码进行相应的改变。站点设计的修改往
+往比底层Python代码的修改要繁琐的多，由此如果可以不再进行Python代码修改的现况
+下变更设计，那将会方便得多。
+
+2.Python代码编写和HTML设计是两个不同的工作，大多数专业的网站开发环境都将他们
+分配给不同的人员(部门)来完成。设计者和HTML/CSS的编码人员不应该被要求去编辑
+Python的代码来完成他们的工作
+
+3.程序员编写Python代码和设计人员制作模板两项工作同时进行的效率是最高。
+
