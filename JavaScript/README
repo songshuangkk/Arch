@@ -1,0 +1,101 @@
+				JavaScript的基础和语法
+
+1.区分大小写
+2.变量是弱类型变量：定义变量是只用var运算符，可以将它初始化为任意值
+如：
+var color = "red";
+vat num = 25;
+3.每行结尾的分号可有可无
+4.注释和C他们相同
+5.括号表明代码块。如同C一样
+
+				JavaScript变量
+
+定义的变量不一定是要进行初始化的。
+var test;
+这样也是可以的。
+可以将我们的变量进行转换：
+如：
+var test = "songshuang";
+alert(test);
+test = 24;
+alert(test);
+变量名需要遵循的两条简单的规则：
+1.第一个字符必须是字母，下滑线，或者$符号
+2.余下的字符可以是下划线，$或字母
+
+				JavaScript关键字
+break	else	new	var
+case	finally	return 	void
+catch	for	switch	while
+continue function this  with
+default if 	throw	
+delete	in	try
+do	instanceof	typeof
+
+typeof运算符用来检查变量的类型。
+
+脚本总是放在<script></script>的HTML之间
+document.write(“Hello World”):它获得文档窗口，并在其中写入“Hello World”
+注意：结尾要使用;号
+
+函数：function
+每个函数必须有一个名字，并可被脚本的其他部分调用
+函数由单词function加上函数名组成。函数名后面是元括号，在后面是花括号
+如:
+ function sysSomething() {
+	alert("Four score and seven years ago");
+}
+
+使用外部脚本:
+<script src="scirpt02.js"></script>
+我们使用script02.js这样的一个脚本
+
+window.onload = writeMessage;
+window.onload是一个事件处理程序，它的意思是，当我们的窗口加载完成的时候，运
+行writeMessage函数
+
+document.getElementById("helloMessage").innerHTML = "Hello World";
+这句话是在我们的网页中去匹配id是helloMessage的tag，然后将Hello World放入这个
+tag的内容中
+
+alert()用来向用户发出警告！
+如:alert("OK!");
+
+条件的使用:
+if (confirm("Are you sure you want to do that?")){
+	alert("You said yes");
+}
+else {
+	alert("You said no");
+}
+
+confirm()方法用来向用户进行询问问题。
+
+还可以使用prompt()进行默认的处理：
+var ans = prompt("Are you sure you want to do that?","Yes")
+if (ans){
+	alert("You said"+ans);
+}
+else{
+	alert("You refused to answer");
+}
+
+多条件的处理：switch/case
+
+
+处理错误：try/throw/catch和我们的C++python中用法类似
+如：
+windw.onload = initAll;
+function initAll(){
+	var ans = prompt("Enter a number","0");
+	try{
+		if(!ans || isNaN(ans) || ans < 0){
+			throw new Error("Not a valid number");
+		}
+		alert("The square root of "+ ans +" is " + ath.sqrt(ans))
+	}
+	catch(errMsg){
+		alert(errMsg.message);
+	}
+}
