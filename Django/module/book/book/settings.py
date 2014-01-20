@@ -1,5 +1,5 @@
 """
-Django settings for mysite project.
+Django settings for book project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.6/topics/settings/
@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.6/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '$ny5p94r_zyk7z@u870h0qg%r)x+5tczyn0ff_4qcl^_9cpmfd'
+SECRET_KEY = 'r=jct&yse*5gn(bkto==x=h$x(bev1rl06r5ekjh*@5r=pb0k8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'books',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -47,9 +48,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'mysite.urls'
+ROOT_URLCONF = 'book.urls'
 
-WSGI_APPLICATION = 'mysite.wsgi.application'
+WSGI_APPLICATION = 'book.wsgi.application'
 
 
 # Database
@@ -61,11 +62,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
-TEMPLATE_DIRS = (
-    #Put strings here, like "/home/html/django_templates"
-    #Don't forget to use absolute paths
-)
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/

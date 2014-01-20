@@ -310,3 +310,261 @@ render_to_response()的第一个参数必须是要使用的模块名称。如果
 <p>it is now {{ current_date }}.</p>
 {% endblock %}
 ....
+
+
+============================================================================
+					模型	
+
+在视图中进行数据库查询的方法：
+from django.shortcuts import render_to_response
+import MySQLdb
+
+def book_list(request):
+	db = MySQLdb.connect(user='me', db='mydb',passwd='secrect',host='localhost')
+	cursor = db.cursor()
+	cursor.execute('SELECT name FROM books ORDER BY name')
+	names = [row[0] for row in cursor.fetchall()]
+	db.close()
+	return render_to_response('book_list.html',{'name':names})
+
+MTV开发模式:
+MVC(Model-View-Controller):把数据存取逻辑，业务逻辑和表现逻辑组合在一起的概
+念有时被称为软件架构的MVC模式。
+Model：代表数据存取层
+View：代表的是系统中选择显示什么和怎么显示的部分
+Controller：代表的是系统中根据用输入并视需要访问模型，以决定使用哪个试图的那
+部分
+Django遵循这样的设计模式
+M:数据存取部分，由Django数据库层处理
+V:选择显示哪些数据要显示以及怎样显示的部分。由视图和模板处理
+C:根据用户输入委派视图的部分，由Django框架根据URLconf设置，对给定URL调用适当
+的Python函数
+由于C由框架自行处理，而Django里更关注的是模型(Module),模板(Template)和视图(V
+iews)------->MTV
+
+在Django对MVC的诠释中，视图用来描述要展现给用户的数据;不是数据如何展现，而且
+展现哪些数据。
+
+
+数据库的配置:
+在我们的settings.py中要进行如下的配置
+DATABASE_ENGINE=''
+DATABASE_NAME=''
+DATABASE_USER=''
+DATABASE_PASSWORD=''
+DATABASE_HOST=''
+DATABASE_PORT=''
+
+DATABASE_ENGINE:告诉Django使用哪个数据库引擎。
+配置范例：
+DATABASE_ENGINE='postgresql_psyconpg2'
+
+DATABASE_NAME='mydb'如果使用SQLite：需要指定完整的文件系统路径:
+DATABASE_NAME='/home/django/mysql.db'
+
+DATABASE_USER='songshuang'
+
+DATABASE_PASSWORD='123456'
+
+DATABASE_HOST='192.168.131.12'
+
+DATABASE_PORT=''
+
+from django.db import connection
+cursor = connection.cursor()
+
+Django用模型在后台执行SQL代码并把结果用Python的数据结构来描述。Django也使用
+模型来呈现SQL无法处理的高级概念。
+
+使用模型的一般过程:
+1.使用Python来描述我们的对象。在我们的module.py中
+from django.db import models
+
+class Publisher(models.Model):
+    name = models.CharField(max_length=30)
+    address = models.CharField(max_length=50)
+    city = models.CharField(max_length=60)
+    state_province = models.CharField(max_length=30)
+    country = models.CharField(max_length=50)
+    website = models.URLField()
+
+class Author(models.Model):
+    first_name = models.CharField(max_length=30)
+    last_name = models.CharField(max_length=40)
+    email = models.EmailField()
+
+class Book(models.Model):
+    title = models.CharField(max_length=100)
+    authors = models.ManyToManyField(Author)
+    publisher = models.ForeignKey(Publisher)
+    publication_date = models.DateField()
+
+每个数据模型都是django.db.models.Model的子类。
+它的父类Model包含了所有必要的和数据库交互的方法，并提供了一个简洁漂亮的定义
+数据库字段的语法。
+每个模型相当于单个数据库表，每个属性也是这个表中的一个字段。属性名就是字段名
+，它的类型(CharField)相当于数据库中的字段类型(varchar)。
+
+每个数据库表对应一个类，这条规则的列外情况是多对多关系。
+在我们的范例中，Book有一个多对多字段叫做author。想法，Django创建了一个额外的
+表（多对多连接表）来处理书籍和作者之间的映射关系。
+
+最后需要注意的是，我们并没有显示地为这些模型定义任何主键。除非你单独指明，否
+则Django会自动为每个模型生成一个自增长的整数主键字段每个D激昂哦模型都要求有
+单独的主键。id
+
+2.模型安装
+在我们的settings.py中的INSTALL_APP中添加我们刚刚创建的模块。
+然后使用python manage.py vaildate进行验证模型的有效性
+当我们模型没有问题的是哈，我们可以使用SQL语句了。
+python manage.py sqlall books
+
+BEGIN;
+CREATE TABLE "books_publisher" (
+    "id" integer NOT NULL PRIMARY KEY,
+    "name" varchar(30) NOT NULL,
+    "address" varchar(50) NOT NULL,
+    "city" varchar(60) NOT NULL,
+    "state_province" varchar(30) NOT NULL,
+    "country" varchar(50) NOT NULL,
+    "website" varchar(200) NOT NULL
+)
+;
+CREATE TABLE "books_author" (
+    "id" integer NOT NULL PRIMARY KEY,
+    "first_name" varchar(30) NOT NULL,
+    "last_name" varchar(40) NOT NULL,
+    "email" varchar(75) NOT NULL
+)
+;
+CREATE TABLE "books_book_authors" (
+    "id" integer NOT NULL PRIMARY KEY,
+    "book_id" integer NOT NULL,
+    "author_id" integer NOT NULL REFERENCES "books_author" ("id"),
+    UNIQUE ("book_id", "author_id")
+)
+;
+CREATE TABLE "books_book" (
+    "id" integer NOT NULL PRIMARY KEY,
+    "title" varchar(100) NOT NULL,
+    "publisher_id" integer NOT NULL REFERENCES "books_publisher" ("id"),
+    "publication_date" date NOT NULL
+)
+;
+CREATE INDEX "books_book_authors_36c249d7" ON "books_book_authors" ("book_id");
+CREATE INDEX "books_book_authors_e969df21" ON "books_book_authors" ("author_id");
+CREATE INDEX "books_book_81b79144" ON "books_book" ("publisher_id");
+
+COMMIT;
+自动生成的表名是app名称(books)和模型的小写名称(publisher,book,author)的组合
+Django为每个表格自动添加一个id主键。
+按约定，Django添加"_id"后缀到外键字段名。
+外键使用REFERENCES语句明确定义的。
+
+sqlall命令并没有在数据库中真正的创建数据表，只是把SQL语句段打印出来。
+
+更简单的一种提交SQL语句至数据库的方法：syncdb命令
+python manage.py syncdb
+执行完这条语句后，会显示如下的内容：
+Creating table books_publisher
+Creating table books_author
+Creating table books_book
+Installing index for books.Book model
+
+syncdb命令是同步你的模型到数据库的一个简单的方法。
+syncdb命令它会根据INSTALLED_APPS里面设置的app来检查数据库，如果表不存在，它
+就会创建它。但是需要的是，syncdb并不能将模型的修改或删除同步到数据库;如果你
+修改或删除了一个模型，并想把它提交到数据库，syncdb并不会做出任何处理。
+
+python manage.py syncdb总是安全的，它不会重复执行SQL语句。
+
+我们可以执行python manage.py dbshell进行使用客户端登入操作。
+这条语句依据DATABASE_SERVER里面的设置来自动检测使用哪种命令行客户端的。
+我们创建一个数据：
+p1 = Publisher(name='', city='',....)
+或者
+p1 = Publisher.object.create(name='',city='',...)
+提交我们的p1
+p1.save()
+我们创建一个对象p1相当于我们对数据库进行INSTA INTO book VALUES (....);
+我们是使用save相当于使用SQL：
+UPDATE book SET （name='',city='',....） WHERE id = 2;
+
+选择对象：
+Publisher.object.all() ===== SELECT * FROM books;
+Django在选择所有数据的时候，并没有使用SELECT * ，而是显示的列出所有的字段。
+
+
+
+数据的过滤：
+使用filter()方法：
+如：
+Publlisher.object.filter(name='songshuang')
+这个用法相当于我们的SQL中的WHERE条件限制。
+我们也可以传递多个条件
+Publlisher.object.filter(name='songshuang', city='ZH')
+多个条件会被转换成我们SQL中的AND
+
+在我们的python中也可以使用正则进行表示
+
+异常的处理：
+当我们的对象不存在，或者返回多个对象的时候，会抛出一个异常:DoesNotExist异常
+我们捕获这个异常:
+try:
+	p = Publisher.object.get(name='songshuang')
+except Publisher.DoesNOtExitst:
+	print "songshuang is not in databases"
+else:
+	print "songshuang is in databases"
+
+数据排序：
+使用order_by()方法：
+Publisher.object.order_by("name")按name进行排序。
+
+连锁查询：
+Publisher.objuect.filter(country='China').order_by("name")
+相当于我们的SQL：
+SELSECT id,name,address,city,state_province,country,website 
+FROM books_publisher
+WHERE country = 'China'
+ORDER BY name DESC;
+
+限制返回数据:
+Publisher.object.order_by("name")[0]
+返回数据中的第一个。
+相当于:
+SELSECT id,name,address,city,state_province,country,website
+FROM books_publisher
+ORDER BY name
+LIMIT 1;
+
+Publisher.object.order_by("name")[0:2]
+相当于：
+SELECT id,name,address,city,state_province,country,website
+FROM books_publisher
+ORDER BY name
+OFFSET 0 LIMIT 2;
+注意：不支持python中的负数索引
+
+更多的对象：
+我们使用save()方法的时候，它会更新我们一行数据中的所有列，有时候，我们不希
+更新所有列，我们可以使用update()方法:
+Publisher.objec.filter(id=52).update(name='songshuang');
+将我们的id为52的行中的name改为songshuang
+这样的用法会使语句变得更高效，并且不会引起竞态条件。
+update（）可以同时更新多条记录。
+
+删除对象:使用delete()方法
+p = Publisher.object.get(name='songshuang')
+p.delete()
+Publisher.object.all()
+我们也可以删除多条数据:
+Publisher.object.all().delete()
+Publisher.object.all()
+
+Djanto要求在删除表内的多有的数据的时候要显示的使用all()
+
+删除部分的数据:
+Publisher.object.filter(name='songshuang').delete()
+
+
