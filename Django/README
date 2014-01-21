@@ -568,3 +568,121 @@ Djanto要求在删除表内的多有的数据的时候要显示的使用all()
 Publisher.object.filter(name='songshuang').delete()
 
 
+
+
+===========================================================================
+					
+							Django站点管理
+
+django.contrib包：
+Djanto自动管理工具是django.contrib的一部分。
+django.contrib.admin。
+用户鉴别系统：django.contrib.auth
+支持会话：django.contrib.sessioins
+用户评注系统:django.contrib.comments
+
+
+激活管理界面：
+
+管理的步骤:
+一.对settings文件做如下的改变：
+	1.将'django.contrib.admin'加入settings中的INSTALL_APPS配置中。
+	2.保证INSTALL_APPS中包含'django.contrib.auth','django.contrib.contenttyp
+es' 和 'django.contrib.sessions'。Django的管理工具需要这三包
+	3.确保MIDDLEWARE_CLASSES包含'django.middleware.common.CommonMiddleware',
+'django.contrib.sessions.middleware.SessionMiddleware'和'django.contrib.auth
+.middleware.AuthenticationMiddleware'
+
+第二步：
+运行python manage.py syncdb。这一部将生成管理界面使用的额外数据库表。当你把
+'django.contrib.auth'加入INSTALL_APPS后，第一次运行syncdb命令的时候，系统就
+会为你创建一个超级用户。
+
+第三步：
+将admin访问配置在URLconf(在urls.py中)
+注意：以下的内容是必须确保存在的:
+
+from django.contrib import admin
+admin.autodiscover()
+
+urlpatterns = patterns('',
+	#....
+	(r'^admin/$',include(admin.site.urls)),
+	#....
+)
+
+配置好之后，我们在我们的127.0.0.1:8000/admin/中就可以访问了。
+
+在Django管理页面中，每一个数据类型都有一个 *change list* 和*edit form*。前者
+显示数据库中所有的可用对象，后者可以让你添加，更改和删除数据库中的某条记录
+
+
+将Models加入到Adimin管理中
+
+Admin的工作：
+当服务启动的时候，Django从'url.py'引导URLconf，然后执行'admin.autodiscover()
+'语句。这个函数遍历INSTALL_APPS配置，并且寻找相关的admin.py文件。如果在指定
+的app目录下找到admin.py，它就执行其中的代码。
+
+在我们的app模块中，每次调用admin.site.resigter()都将那个模块注册到管理工具中
+。管理工具只是为那些明确注册的模块显示一个编辑/修改的界面。
+
+应用程序django.contrib.auth包含自身的admin.py,所以User和Groups能在管理工具中
+自动显示。其它的django.contrib应用程序，如django.contrib.redirects，其他从网
+上下载的第三方Django应用程序一样，都会自动添加到管理工具。
+
+管理工具其实就是一个Django应用程序，包含自己的模块，模板，视图和URLpatterns
+你要像添加自己的视图一样，把它添加到URLconf里面。你可以在Django基本代码中的
+django/conrib/admin目录下，检查它的模板，视图和URLpatterns，但你不要尝试直接
+修改其中的任何代码，因为里面有很多地方可以让你自定义管理工具的工作方式。
+
+我们的SQL中有NULL这样的值，它不同于空字符串，就像python中的None不同于""一样
+这意味着某个字符字段(如VARCHAR)的值不可能同时包含NULL和空字符串。
+
+为了消除歧义，Django生成CREATE_TABLE语句自动为每个字段显示的加上NOT NULL。
+如:
+CREATE TABLE "books" (
+	"name" varchar(50) NOT NULL
+)
+
+但是在时期型，时间型和数字型字段不能接收空字符。我们在Django中的设置如下:
+class Book(models.Model):
+	title = models.CharField(max_lengt=100)
+	authors = models.ManyToManyField(Author)
+	publisher = models.ForeginKey(Publisher)
+	publisher_date = models.DateField(**bland=True, null=True**)
+
+blank=True和null=True表示可以是空字符串
+
+
+自定义列表：
+列表默认显示查询结果中对象的__unicode_():
+class Author(models.Model):
+	first_name = models.CharField(max_length=30)
+	last_name = models.CharField(max_length=40)
+	email = models.EmailField(blank=True,verbose_name='e-mail')
+
+	def __unicode__(self):
+		return u'%s %s' % (self.first_name, self.last_name)
+
+	
+使用ModelAdmin类。这个类是自定义管理工具的关键，其中最基本的一件事情是允许你
+指定列表中的字段。
+如:
+from django.contrib import admin
+from mysite.books.models import Publisher, Author, Book
+
+class AuthorAdmin(admin.ModelAdmin):
+	list_display = ('first_name', 'last_name', 'email')
+
+admin.site.register(Publisher)
+admin.site.register(Author, AuthorAdmin)
+admin.site.register(Book)
+
+我们修改了admin.site.register()调用，在Author后面添加了AuthorAdmin。用Author
+Admin选项注册Author模块。
+
+增加一个快速查询栏。向AuthorAdimn追加serach_fields如：
+class AuthorAdmin(admin.ModelAdmin):
+	list_display = ('first_name', 'last_name', 'email')
+	search_fields = ('first_name','last_name')
