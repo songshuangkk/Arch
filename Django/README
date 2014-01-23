@@ -686,3 +686,111 @@ Admin选项注册Author模块。
 class AuthorAdmin(admin.ModelAdmin):
 	list_display = ('first_name', 'last_name', 'email')
 	search_fields = ('first_name','last_name')
+
+
+
+================================================================================
+
+				表	单
+
+================================================================================
+
+从Request对象获取数据
+每个view函数的一个参数是一个HttpRequest对象
+
+URL相关信息：
+HttpRequest对象包含当前请求URL的一些信息
+
+request.path	 除域名以外的请求路径，以正斜杠开头
+request.get_host()	主机名(比如,通常所说的域名)
+request.get_full_path()		请求路径，可能包含查询字符串
+request.is_secure()	如果通过HTTPS访问，则此方法为True，否则返回Flase
+在views函数里，要始终用这个属性或方法来得到URL，而不要手动输入。
+如:
+def current_url_view_good(request):
+    return HttpRequest("Welcome to the page at %s"% request.path)
+
+有关request的其他信息：
+request.META是一个python字典，包含了所有本次HTTP请求的Header信息。
+字典当中常见的几个键有:
+	HTTP_REFERER:进站前链接网页，如果有的话
+	HTTP_USER_AGENT:用户浏览器的user-agent字符串
+	REMOTE_ADDR:客户端IP
+注意：因为request.META是一个普通的python字典，因此当你视图访问一个不存在的键是，会触发一个ke
+yError异常，我们应该使用tey/except语句。
+如:
+def ua_display_good(request):
+    try:
+	ua = request.META['HTTP_USER_AGENT']
+    except KeyError:
+    	   ua = 'unknown'
+    return HttpResponse('Your browser is %s'%ua)
+
+或者:
+def ua_display_good(request):
+    ua = request.META.get('HTTP_USER_AGENT', 'unknown')
+    return HttpResponse('Your browser is %s'%ua)
+
+
+	
+提交的数据信息
+除了基本的元数据，HttpRequest对象还有两个属性包含了用户提交的信息:request.GET()和request.post()二者都是类字典对象，我们可以通过它们来访问GET和POST数据
+
+类字典对象:
+POST数据是来自HTML中的<form>标签提交的,而GET数据可能来自<form>提交也可能是字符串
+
+表单处理示例:
+
+第一步:建立view来显示一个搜索表单
+from django.shortcuts import render_to_response
+
+def search_form(request):
+    return render_to_response('search_form.html')
+
+#search_form.html#
+<html>
+<head>
+	<title>Search</title>
+</head>
+<body>
+	<form action="/search/" method="get">
+	<input text="text" name="q">
+	<input type="submit" value="Search">
+</body>
+</html>
+
+而在urls.py中的URLpatterm:
+
+urlpatterms = patterms('',
+	#...
+	(r'^search-form/$', search_form),
+	#...
+)
+
+在我们的views中添加search的内容:
+#views.py#
+def search(request):
+    if 'q' in request.GRT:
+       message = 'You search for:%r '%resquest.GET['q']
+    else:
+	message = 'You submitted an empty form'
+    return HttpResponse(message)
+
+1.在HTML里我们定义一个变量q。当提交表单的时候，变量q的值通过GET(method="get")附加在 URL/search上
+2.处理/search/ 的视图通过request.GET来获取q的值
+
+
+使用POST：
+获取使用POST方法的数据与GET的相似，只是使用request.POST代替了request.GET。
+POST和GET的不同:
+当我们提交表单仅仅需要获取数据就可以使用GET
+当我们提交表单的时候，需要更改服务器状态的,或者说发送e-mail，或者其他不仅仅是获取并显示数据的
+时候就用POST。
+
+def search(request):
+    if 'q' in request.GET and request.GET['q']:
+       q = request.GET['q']
+       books = Book.object.filter(title_icontains=q)
+       return render_to_response('search_result.html', {'books':books, 'query':q})
+    else:
+	return HttpResponse('Please submit a search term')
