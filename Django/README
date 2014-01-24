@@ -794,3 +794,231 @@ def search(request):
        return render_to_response('search_result.html', {'books':books, 'query':q})
     else:
 	return HttpResponse('Please submit a search term')
+
+
+当我们的HTML网页中:
+<form action="" method="get">
+action=""意味着表单将提交给与当前页面相同的URL。
+
+
+编写Contact表单：
+站点联系表单：
+这个表单包括用户提交的反馈信息，一个可选的e-mail回信地址。当这个表单提交并且数据通过验证以后，
+系统将自动发送一封包含用户提交的信息的e-mail给站点工作人员。
+
+contact_form.html模板:
+<html>
+<head>
+	<title>Contact us</title>
+</head>
+<body>
+	<h1>Contact us</h1>
+	{% if errors %}
+	   <ul>
+		{% for error in errors%}
+		   <li>{{ error }}</li>
+		{% endfor %}
+	   </ul>
+	{% endif %}
+
+	<form action="contact" /method="post">
+	      <p>Subject:<input type="text" name="subject"></p>
+	      <p>Your e-mail(optional):<input type="text" name="email"></p>
+	      <p>Message<textarea name="message" rows="10" cols="50"></textarea></p>
+	      <input type="submit" value="Submit">
+	</form>
+</body>
+</html>
+
+我们定义了三个字段:主题,e-mail和反馈信息。除了e-mail字段为可选，其他两个字段都是必填的。
+注意:这里使用的method="post"而非"get"，因为这个表单会有一个服务器端的操作:发送一封e-mail。
+
+contact()视图代码:
+from django.core.mail import send_mail
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
+
+def contact(request):
+    errors = []
+    if request.method == 'POST':
+       if not request.POST.get('subject'):
+       	  errors.append('Enter a subject')
+       if not request.POST.get('message'):
+       	  errors.append('Enter a message')
+       if not request.POST.get('email') and '@' not in request.POST['email']:
+       	  errors.append('Enter a valid e-mail address')
+    
+     if not errors:
+     	send_email(
+		request.POST['subject'],
+		request.POST['message'],
+		request.POST.get('email','noreplly@example.com'),
+		['siteownwe@example.com'],
+	)
+     	return HttpResponseRedirect('/contact/thanks')
+
+     return render_to_response('contact_form.html')
+
+分析:
+确认request.method的值是'POST'。用户浏览表单时这个值并不会存在，当且仅当表单被提交时这个值才出现。在普通的网页浏览中，浏览器都使用GET，而非POST。
+判断request.method的值很好地帮助我们将表单显示与表单处理隔离开来。
+
+我们使用request.POST代替request.GET来获取提交的数据。只是必须的，因为contact_form.html里表单使用的是method="post".如果在视图里面通过POST来获取数据，那么request.GET将为空。
+
+这里，有两个必填项,subject和message，所以需要对这两个进行验证。注意,我们使用request.POST.get()方法，并提供一个空的字符串作为默认值:这个方法很好的解决了键丢失与空间数据问题。
+
+我们使用django.core.mail.send_mail函数来发送e-mail。这个函数有四个必选参数:主题,正文,寄信
+人和收件人列表。send_mail是Django的EmailMessage类的一个方便的包装,EmailMessage类提供了更高级的方法，比如附加，多部分邮件，以及对邮件头部完整的控制。
+
+注意，若要使用send_mail()函数来发送邮件，那么服务器需要配置成能够对外发送邮件，并且在Django中设置出站服务器地址。
+
+注意：如果用户在POST表单之后被重定向到另外的页面，就不会造成重复的请求。
+
+我们应该每次都给成功的POST请求做重定向。这就是web开发的最佳实践。
+
+
+
+Form类：
+
+Djanto带有一个form库，称为django.forms。
+
+在社区当中的django.forms其实就是现在比较新的django.newforms。
+
+表单框架最主要的用法是,为每一个将要处理的HTML的<form>定义一个Form类。
+我们可以在我们的views中直接使用这个类:
+
+from django import forms
+
+class ContactForm(forms.Form):
+    subject = form.CharField()
+    email = form.EmailField(requeired=False)
+    message = forms.CharField()
+
+我们可以创建一个新的Form对象:
+f = ContactForm({"subject":"hello", "email":"songshuang@gmail.com", "message":"Nice site!"})
+一旦你对一个Form实体赋值，我们就可以得到一个绑定的form:
+f.is_bound====True
+调用任何绑定form的is_valid()方法，就可以直到它的数据是否合法。
+f.is_valid() ===True
+
+如果我们不传入emial的值的时候，它依然是合法的，因为我们在定义这个字段的属性的时候required=False
+如果我们定义subject或message为空的时候，就不合法，因为我们没有对其属性进行设置。
+
+每一个绑定的Form实体都有一个errors属性，它为你提供了一个字段与错误消息映射的字典表:
+f = ContactForm({"subject":"hello","message":""})
+f.errors ===> {"message":{u'this field is required'}}
+
+最终，如果一个Form实体的数据是合法的，它就会有一个可用的cleaned_data属性。这是一个包含干净的提交数据的字典。Django的form框架不但校验数据，它还会把他们转换成相应的Python类型数据，这叫清理数据。
+
+f = ContactForm({"subject":"hello","email":"songshuang@gmail.com", "message":"Nice site!"})
+f.is_valid()--->True
+f.cleaned_data--->{'message':u'Nice site!', 'email':'songshuang@gmail.com', 'subject':u'hello'}
+
+
+在视图中使用Form对象:
+如:
+#views.py#
+from django.shortcuts import render_to_response
+import ContactForm
+
+def contact(request):
+    if reuqest.method=="POST"
+       form = ContactForm(request.POST)
+       if form.is_vaild():
+       	  cd = form.cleaned_data
+	  send_mail(
+		cd['subject'],
+		cd['message'],
+		cd.get('email','songshuang@gmail.com'),
+		['songsuangkk@sina.com'],
+	  )
+	  return HttpResponseRedirect('/contact/thanks')
+     else:
+	form = ContactForm()
+     return rneder_to_response('contact_form.html',{'form':form})
+
+
+#contact_form.html#
+<html>
+<head>
+	<title>Contact us</title>
+</head>
+<body>
+	<h1>Contact us</h1>
+	
+	{% if form.errors %}
+	   <p style="color:red">
+	      Please correct the error{{ form.errors|pluralize}} below.
+	   </p>
+	{% endif %}
+	
+	<form action="" method="post">
+	      <table>
+		{{ form.as_table }}
+	      </table>
+	      <input type="submit" value="Submit">
+	</form>
+</body>
+</html>
+
+
+改变字段显示:
+forms框架把每一个字段的显示逻辑分离到一组部件(widget)中。每一个字段类型都拥有一个默认的部件，我们也可以容易的替换掉默认的部件，获知提供一个自定义的部件。
+我们使用*widget*来修饰:
+
+from django import forms
+class ContactForm(forms.Form):
+      subject = form.CharField()
+      email = forms.EmailField(required=False)
+      message = form.CharField(widget=forms.Textarea)
+
+设置最大长度:
+一个最经常使用的校验要求是检查字段长度。
+from django import forms
+
+class ContactForm(forms.Form):
+      subject = forms.CharField(max_length=100)
+      email = forms.EmailField(required=False)
+      message = forms.CharField(widget=forms.Textarea)
+
+
+
+设置初始值：
+使用initail参数:
+def contact(request):
+    if request.method=='POST':
+       form = ContactForm(request.POST)
+       if form.is_vaile():
+       	  cd = form.cleaned_data
+	  send_mail(
+		cd['subject'],
+		cd['message'],
+		cd.get('email','songshuang@gmail.com'),
+		['songhshuang@sina.com'],
+	  )
+	  return HttpResponseRedirect('/contact/thanks')
+     else:
+	form ContactForm()
+	     initial = ['subject':'love youe site']
+     return render_to_response('contact_form',{'form':form})
+
+
+自定义校验规则：
+
+如果我们的规则会被一次又一次的使用，我们可以创建一个自定义的字段类型。大多数的自定义校验都是一次性的，可以直接绑定到form类。
+
+我们希望‘message’字段有一个额外的校验，我们增加一个'clean_message()'方法到'Form'类：
+
+from django import forms
+
+class ContactForm(forms.Form):
+      subject = form.CharField(max_length=100)
+      email = form.EmailField(required=False)
+      message = form.CharField(widget=forms.Textarea)
+
+      def clean_message(self):
+      	  message = self.cleaned_data('message')
+	  num_words = len(message.split())
+	  if num_words < 4:
+	     raise forms.ValidataionError('Not enougth words')
+	  return message

@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.http import HttpResponse
 
+form
 import os
 
 # Create your views here.
@@ -24,3 +25,8 @@ def search(request):
 		message = 'You submitted an empty form'
 	
 	return HttpResponse(message)
+
+def contact_form(request):
+	
+def contact(request):
+
