@@ -26,6 +26,6 @@ int main(int argc, char const *argv[])
 	c c1;
 	cout << "base address: " << &c1<< endl;
 	cout << "function address: " << (int *)*(int *)&c1 << endl;
-	(*((int*)&c1))+1;
+	
 	return 0;
 }
