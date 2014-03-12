@@ -1,0 +1,107 @@
+#include <stdio.h>
+#include <string.h>
+
+typedef struct node{
+	char name;
+	int length[6];
+}Node;
+
+Node grap[6] = {{'A',{0,2,5,7,10000,10000}},{'B',{2,0,4,10000,10000,10000}},{'C',{5,4,0,8,10,10000}},
+{'D',{7,10000,8,0,11,9}},{'E',{10000,10000,10,11,0,6}},{'F',{10000,10000,10000,9,6,0}}};
+char path[6] = {};
+int dis = 0;
+int k = 0;
+
+void search()
+{
+	char start,end;
+	int flag_start, flag_end;
+
+	int i, j;
+	int min = 10000;
+	int z;
+	int time=0;
+
+	printf("Please input the start and end:");
+	scanf("%c",&start);
+	getchar();
+	scanf("%c",&end);
+	getchar();
+
+	for(i = 0; i < 6;i++)
+	{
+		if(grap[i].name == start)
+			flag_start = i;
+		if(grap[i].name == end)
+			flag_end = i;
+	}
+
+	path[k] = grap[flag_start].name;
+	k++;
+
+	if(grap[flag_start].length[flag_end]<min&&grap[flag_start].length[flag_end]>0)
+	{
+		path[k] = grap[flag_end].name;
+		dis = dis+grap[flag_start].length[flag_end];
+		return;
+	}
+
+	//找到没有使用过的第一个点
+	for(i=0;i<6;i++)
+	{
+		if(grap[flag_start].length[i]<min&&grap[flag_start].length[i]>0)
+		{
+			min = grap[flag_start].length[i];
+			z = i;
+		}
+	}
+
+	
+	for(j=flag_start; time<6; time++);
+	{
+		for(i=0; i<6; i++)
+		{
+			if(grap[j].length[flag_end]!=1000)
+			{
+				path[k++] = grap[i].name;
+				dis = dis+grap[i].length[flag_end];
+				return;
+			}
+			if(grap[j].length[i]<min)
+			{
+				min = grap[j].length[i];
+				z = i;
+				j = j+z;
+			}
+		}
+	}
+
+
+
+}
+
+void show()
+{
+	int i;
+	for(i=0;i<=k;i++)
+	{
+		printf("%c", path[i]);
+		printf("->");
+	}
+	printf("\n%d\n",dis);
+
+	dis = 0;
+	k = 0;
+	bzero(path, 6);
+}
+
+int
+main(int argc, char const *argv[])
+{
+	while(1)
+	{
+		search();
+		show();
+	}
+	return 0;
+}
