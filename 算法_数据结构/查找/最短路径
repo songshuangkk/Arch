@@ -1,0 +1,129 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+typedef struct node{
+	char name;
+	int dis;
+	int length[6];
+}Node;
+
+Node grap[6] = {{'A',0,{0,2,5,7,10000,10000}},{'B',0,{2,0,4,10000,10000,10000}},{'C',0,{5,4,0,8,10,10000}},
+{'D',0,{7,10000,8,0,11,9}},{'E',0,{10000,10000,10,11,0,6}},{'F',0,{10000,10000,10000,9,6,0}}};
+char path[6] = {};
+int dis = 0;
+int k = 0;
+int flag_start, flag_end;
+
+void search()
+{
+	char start,end;
+
+	int use[6] = {};
+	int over[6] = {};
+	int i, j;
+	int min = 10000;
+	int z;
+	int n;
+
+	printf("Please input the start and end:");
+	scanf("%c",&start);
+	getchar();
+	scanf("%c",&end);
+	getchar();
+
+	for(i = 0; i < 6;i++)
+	{
+		if(grap[i].name == start)
+			flag_start = i;
+		if(grap[i].name == end)
+			flag_end = i;
+	}
+
+	path[k] = grap[flag_start].name;
+	k++;
+
+	if(grap[flag_start].length[flag_end]<min&&grap[flag_start].length[flag_end]>0)
+	{
+		path[k] = grap[flag_end].name;
+		k++;
+		grap[flag_end].dis = dis+grap[flag_start].length[flag_end];
+		return;
+	}
+
+	//找到没有使用?的第一个点
+	for(i=0;i<6;i++)
+	{
+		if(grap[flag_start].length[i]<min&&grap[flag_start].length[i]>0)
+		{
+			min = grap[flag_start].length[i];
+			z = i;
+		}
+	}
+
+	use[0] = flag_start;
+	use[1] = z;
+	over[flag_start] = 1;
+	over[z] = 1;
+	n = 1;
+
+	while(n<6)
+	{
+		for(i=0;i<n;i++)
+		{
+			min = 10000;
+			for(j=0;j<6;j++)
+			{
+				if(!over[j])
+				{
+					if(grap[use[i]].length[j]<min&&grap[use[i]].length[j]>0)
+					{
+						min = grap[use[i]].length[j];
+						z = j;
+					}
+				}
+			}
+			if(dis+grap[use[i]].length[z]<grap[use[0]].length[z])
+				dis = dis+grap[use[i]].length[z];
+			else
+				if(dis+grap[flag_start].length[z]!=10000&&dis+grap[flag_start].length[z]>0)
+					dis = grap[use[i]].length[z];
+			
+		}
+		grap[z].dis = dis;
+		n++;
+		use[n] = z;
+		over[z] = 1;
+		path[k] = grap[z].name;
+		k++;
+		if(z==flag_end)
+				return ;
+	}
+
+}
+
+void show()
+{
+	int i;
+	for(i=0;i<k;i++)
+	{
+		printf("%c", path[i]);
+		printf("->");
+	}
+	printf("\n%d\n",grap[flag_end].dis);
+
+	dis = 0;
+	k = 0;
+	bzero(path, 6);
+}
+
+int
+main(int argc, char const *argv[])
+{
+	while(1)
+	{
+		search();
+		show();
+	}
+	return 0;
+}
