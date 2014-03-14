@@ -1,0 +1,62 @@
+/***实现正则表达式中的通配符'?'和'*'***/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+char* my_find(char input_string[], char rule_string[])
+{
+	int i = 0;
+	char *input = input_string;
+	char *rule = rule_string;
+	char *match_string = (char*)malloc(20);
+	bzero(match_string, 20);
+
+	while(*input)
+	{
+		while((*rule == '?') || (*rule == *input) || *rule == '*')
+		{
+			if(*rule == '*')	/*当匹配到'*'的时候，进行的处理*/
+			{	
+				rule++;
+				while(1)
+				{
+					match_string[i++] = *input;
+					input++;
+					if(*input == *rule)
+						break;
+				}
+				
+			}
+			else	/*匹配到非'*'的时候进行的处理*/
+			{
+				match_string[i++] = *input;
+				input++;
+				rule++;
+			}
+		}
+		input++;
+	}
+	if(!match_string[0])
+		return NULL;
+	match_string[i] = '\0';
+	return match_string;
+}
+
+int
+main(int argc, const char *argv[])
+{
+	char input[20] = {};
+	char rule[20] = {};
+
+	while(1)
+	{
+		printf("input: ");
+		fgets(input, 20, stdin);
+		printf("rule: ");
+		fgets(rule, 20, stdin);
+
+		printf("The most large match string :%s\n", my_find(input, rule));
+	}
+	return 0;
+}
